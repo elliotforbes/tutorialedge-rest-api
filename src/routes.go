@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 type Route struct {
@@ -16,20 +14,8 @@ type Route struct {
 
 type Routes []Route
 
-func NewRouter() *mux.Router {
-	router := mux.NewRouter().StrictSlash(true)
-	for _, route := range routes {
-		router.
-			Methods(route.Method).
-			Path(route.Pattern).
-			Name(route.Name).
-			Handler(route.HandlerFunc)
-	}
-	return router
-}
-
 func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "TutorialEdge REST API: v0.0.1!")
+	fmt.Fprintln(w, "TutorialEdge REST API: v0.0.1")
 }
 
 var routes = Routes{
