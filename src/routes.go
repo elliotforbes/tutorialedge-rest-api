@@ -37,10 +37,10 @@ var routes = Routes{
 
 	// All Tags Routes
 	Route{"Alltags", "GET", "/tags", AllTags},
-	Route{"Gettag", "GET", "/tag/:id", GetTag},
+	Route{"Gettag", "GET", "/tag/{id}", GetTag},
 	Route{"NewTag", "POST", "/tag", InsertTag},
-	Route{"EditTag", "POST", "/tag/:id", EditTag},
-	Route{"DeleteTag", "DELETE", "/tag/:id", DeleteTag},
+	Route{"EditTag", "POST", "/tag/{id}", EditTag},
+	Route{"DeleteTag", "DELETE", "/tag/{id}", DeleteTag},
 	// All Posts Routes
 	// ...
 	Route{"AllPosts", "GET", "/posts", AllPosts},
