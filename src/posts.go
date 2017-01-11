@@ -28,11 +28,11 @@ func AllPosts(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	var posts []Post
-	results, err := db.Query("SELECT id, title FROM posts")
+	results, err := db.Query("SELECT id, title, description, body, slug, isLive, author FROM posts")
 
 	for results.Next() {
 		var post Post
-		err = results.Scan(&post.ID, &post.Title)
+		err = results.Scan(&post.ID, &post.Title, &post.Desc, &post.Body, &post.Slug, &post.IsLive, &post.Author)
 		if err != nil {
 			json.NewEncoder(w).Encode(HttpResp{Status: 200, Description: "Failed to select all from posts"})
 		}
@@ -47,8 +47,21 @@ func GetPost(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	vars := mux.Vars(r)
-	postID := vars["id"]
-	fmt.Fprintln(w, "Get Post:", postID)
+	postID, err := strconv.Atoi(vars["id"])
+
+	if err != nil {
+		fmt.Fprintln(w, "Not a Valid id")
+	}
+
+	var post Post
+	// Execute the query
+	err = db.QueryRow("SELECT id, title, description, body, slug, isLive, author FROM posts where id = ?", postID).Scan(&post.ID, &post.Title, &post.Desc, &post.Body, &post.Slug, &post.IsLive, &post.Author)
+	if err != nil {
+		log.Print(err.Error()) // proper error handling instead of panic in your app
+		json.NewEncoder(w).Encode(HttpResp{Status: 500, Description: "Failed to select tag from database"})
+	}
+
+	json.NewEncoder(w).Encode(post)
 }
 
 func InsertPost(w http.ResponseWriter, r *http.Request) {
@@ -80,9 +93,45 @@ func InsertPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeletePost(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Delete Post!")
+	db := connect()
+	defer db.Close()
+
+	vars := mux.Vars(r)
+	postID := vars["id"]
+	ID, _ := strconv.Atoi(postID)
+
+	stmt, err := db.Prepare("DELETE FROM posts where id = ?")
+	if err != nil {
+		log.Print(err.Error())
+	}
+
+	_, err = stmt.Exec(ID)
+	if err != nil {
+		json.NewEncoder(w).Encode(HttpResp{Status: 500, Description: "Failed to delete post from database"})
+	}
+	json.NewEncoder(w).Encode(HttpResp{Status: 200, Description: "Successfully Deleted Post from the Database"})
+
 }
 
 func EditPost(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Edit Post!")
+	db := connect()
+	defer db.Close()
+
+	decoder := json.NewDecoder(r.Body)
+	var post Post
+	err := decoder.Decode(&post)
+
+	vars := mux.Vars(r)
+	postID := vars["id"]
+	ID, _ := strconv.Atoi(postID)
+
+	stmt, _ := db.Prepare("UPDATE posts SET title = ?, description = ?, body = ?, author = ?, updated_at = NOW() WHERE id = ?")
+
+	_, err = stmt.Exec(post.Title, post.Desc, post.Body, post.Author, ID)
+
+	if err != nil {
+		log.Print(err.Error())
+		json.NewEncoder(w).Encode(HttpResp{Status: 500, Description: "Failed to Update Post in the Database"})
+	}
+	json.NewEncoder(w).Encode(HttpResp{Status: 200, Description: "Successfully Update Post in the Database"})
 }
