@@ -40,14 +40,15 @@ func AllTags(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetTag(w http.ResponseWriter, r *http.Request) {
+	db := connect()
+	defer db.Close()
+
 	vars := mux.Vars(r)
 	tagID, err := strconv.Atoi(vars["id"])
 
 	if err != nil {
 		fmt.Fprintln(w, "Not a Valid id")
 	}
-	db := connect()
-	defer db.Close()
 
 	var tag Tag
 	// Execute the query
@@ -61,6 +62,9 @@ func GetTag(w http.ResponseWriter, r *http.Request) {
 }
 
 func InsertTag(w http.ResponseWriter, r *http.Request) {
+	db := connect()
+	defer db.Close()
+
 	decoder := json.NewDecoder(r.Body)
 	var tag Tag
 	err := decoder.Decode(&tag)
@@ -68,8 +72,6 @@ func InsertTag(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Print(err.Error())
 	}
-	db := connect()
-	defer db.Close()
 
 	stmt, _ := db.Prepare("INSERT INTO tags (name) values (?)")
 	res, err := stmt.Exec(tag.Name)
@@ -108,5 +110,24 @@ func DeleteTag(w http.ResponseWriter, r *http.Request) {
 }
 
 func EditTag(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Edit Tag!")
+	db := connect()
+	defer db.Close()
+
+	decoder := json.NewDecoder(r.Body)
+	var newTag Tag
+	err := decoder.Decode(&newTag)
+
+	vars := mux.Vars(r)
+	tagID := vars["id"]
+	ID, _ := strconv.Atoi(tagID)
+
+	stmt, _ := db.Prepare("UPDATE tags SET name = ? WHERE id = ?")
+
+	_, err = stmt.Exec(newTag.Name, ID)
+
+	if err != nil {
+		log.Print(err.Error())
+	}
+	json.NewEncoder(w).Encode(HttpResp{Status: 200, Description: "Successfully Update Tag in the Database"})
+
 }
