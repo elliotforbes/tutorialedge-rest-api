@@ -34,7 +34,7 @@ func AllPosts(w http.ResponseWriter, r *http.Request) {
 		var post Post
 		err = results.Scan(&post.ID, &post.Title, &post.Desc, &post.Body, &post.Slug, &post.IsLive, &post.Author)
 		if err != nil {
-			json.NewEncoder(w).Encode(HttpResp{Status: 200, Description: "Failed to select all from posts"})
+			json.NewEncoder(w).Encode(HttpResp{Status: 500, Description: "Failed to select all from posts"})
 		}
 		posts = append(posts, post)
 	}

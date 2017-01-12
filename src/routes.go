@@ -45,4 +45,10 @@ var routes = Routes{
 	Route{"NewCategory", "POST", "/category", InsertCategory},
 	Route{"EditCategory", "POST", "/category/{id}", EditCategory},
 	Route{"DeleteCategory", "DELETE", "/category/{id}", AllCategories},
+	// All Categories
+	Route{"AllCourses", "GET", "/courses", AllCourses},
+	// Route{"GetCategory", "GET", "/category/{id}", GetCategory},
+	// Route{"NewCategory", "POST", "/category", InsertCategory},
+	// Route{"EditCategory", "POST", "/category/{id}", EditCategory},
+	// Route{"DeleteCategory", "DELETE", "/category/{id}", AllCategories},
 }
