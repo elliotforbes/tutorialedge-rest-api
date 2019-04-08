@@ -7,7 +7,6 @@ This is the REST API that currently powers the backend of https://tutorialedge.n
 
 ~~~
 git clone 
-cd src
 go run *.go
 ~~~
 
